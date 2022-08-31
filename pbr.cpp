@@ -240,34 +240,6 @@ public:
 		return 2 * dot(wi, m) * Vector(m) - wi;
 	}
 
-	Spectrum fresnel(Float cosThetaI, const Spectrum &eta, const Spectrum &k) {
-		if (k.average() < -1) {
-			Spectrum ret = eta + (Spectrum(1) - eta)*pow(1.0 - cosThetaI, 5);
-			return ret;
-		}
-		else {
-			Float cosThetaI2 = cosThetaI*cosThetaI,
-				sinThetaI2 = 1-cosThetaI2,
-				sinThetaI4 = sinThetaI2*sinThetaI2;
-
-			Spectrum temp1 = eta*eta - k*k - Spectrum(sinThetaI2),
-					a2pb2 = (temp1*temp1 + k*k*eta*eta*4).safe_sqrt(),
-					a     = ((a2pb2 + temp1) * 0.5f).safe_sqrt();
-
-			Spectrum term1 = a2pb2 + Spectrum(cosThetaI2),
-					term2 = a*(2*cosThetaI);
-
-			Spectrum Rs2 = (term1 - term2) / (term1 + term2);
-
-			Spectrum term3 = a2pb2*cosThetaI2 + Spectrum(sinThetaI4),
-					term4 = term2*sinThetaI2;
-
-			Spectrum Rp2 = Rs2 * (term3 - term4) / (term3 + term4);
-
-			return 0.5f * (Rp2 + Rs2);
-		}
-	}
-
 	Spectrum eval(const BSDFSamplingRecord &bRec, EMeasure measure) const {
 		/* Stop if this component was not requested */
 		if (measure != ESolidAngle ||
@@ -295,8 +267,7 @@ public:
 			return Spectrum(0.0f);
 
 		/* Fresnel factor */
-		const Spectrum F = fresnel(dot(bRec.wi, H), m_eta->eval(bRec.its), m_k->eval(bRec.its)) *
-			m_specularReflectance->eval(bRec.its);
+		const Spectrum F = m_specularReflectance->eval(bRec.its)*(m_eta->eval(bRec.its) + (Spectrum(1.0) - m_eta->eval(bRec.its))*pow(1.0 - dot(bRec.wi, H), 5));
 
 		/* Smith's shadow-masking function */
 		const Float G = distr.G(bRec.wi, bRec.wo, H);
@@ -366,8 +337,7 @@ public:
 		if (Frame::cosTheta(bRec.wo) <= 0)
 			return Spectrum(0.0f);
 
-		Spectrum F = fresnel(dot(bRec.wi, m),
-			m_eta->eval(bRec.its), m_k->eval(bRec.its)) * m_specularReflectance->eval(bRec.its);
+		const Spectrum F = m_specularReflectance->eval(bRec.its)*(m_eta->eval(bRec.its) + (Spectrum(1.0) - m_eta->eval(bRec.its))*pow(1.0 - dot(bRec.wi, m), 5));
 
 		Float weight;
 		if (m_sampleVisible) {
@@ -411,9 +381,8 @@ public:
 		if (Frame::cosTheta(bRec.wo) <= 0)
 			return Spectrum(0.0f);
 
-		Spectrum F = fresnel(dot(bRec.wi, m),
-			m_eta->eval(bRec.its), m_k->eval(bRec.its)) * m_specularReflectance->eval(bRec.its);
-
+		const Spectrum F = m_specularReflectance->eval(bRec.its)*(m_eta->eval(bRec.its) + (Spectrum(1.0) - m_eta->eval(bRec.its))*pow(1.0 - dot(bRec.wi, m), 5));
+		
 		Float weight;
 		if (m_sampleVisible) {
 			weight = distr.smithG1(bRec.wo, m);
@@ -589,12 +558,7 @@ private:
 };
 
 Shader *pbr::createShader(Renderer *renderer) const {
-	
 }
-//Shader *pbr::createShader(Renderer *renderer) const {
-	//return new pbrShader(renderer,
-	//	m_specularReflectance.get(), m_alphaU.get(), m_alphaV.get(), m_eta.get(), m_k.get());
-//}
 
 MTS_IMPLEMENT_CLASS(pbrShader, false, Shader)
 MTS_IMPLEMENT_CLASS_S(pbr, false, BSDF)

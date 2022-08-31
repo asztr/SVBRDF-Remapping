@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- # Main Scene File -->
+<scene version="0.6.0">
+	<integrator name="integrator" type="direct">
+		<boolean name="hideEmitters" value="true"/>
+		<integer name="emitterSamples" value="1"/>
+		<integer name="bsdfSamples" value="1"/>
+		<boolean name="strictNormals" value="false"/>
+	</integrator>
+
+	<sensor type="perspective" id="camera_00">
+		<float name="fov" value="40.000000"/>
+		<string name="fovAxis" value="y"/>
+		<transform name="toWorld">
+			<lookat up="0, 1, 0" origin="0, 0, -1.5" target="0, 0, 0"/>
+		</transform>
+
+		<float name="nearClip" value="1.0"/>
+		<float name="farClip" value="10.0"/>
+
+		<sampler type="halton">
+			<integer name="sampleCount" value="10"/>
+			<integer name="scramble" value="0"/>
+		</sampler>
+
+		<film name="film" type="hdrfilm">
+			<integer name="width" value="1024"/>
+			<integer name="height" value="1024"/>
+			<rfilter name="rfilter" type="gaussian">
+				<float name="stddev" value="0.500000"/>
+			</rfilter>
+			<boolean name="highQualityEdges" value="false"/>
+			<string name="pixelFormat" value="rgba"/>
+			<boolean name="banner" value="false"/>
+		</film>
+	</sensor>
+
+	<!-- SPECULAR PBR -->
+	<bsdf type="pbr" id="material_pbr">
+		<string name="distribution" value="beckmann"/>
+
+		<texture name="alpha" type="scale">
+			<float name="scale" value="1.0"/>
+			<texture type="bitmap">
+				<string name="filename" value="svr_roughness_beck_remapped.exr"/>
+				<string name="wrapMode" value="repeat"/>
+				<float name="gamma" value="1"/>
+			</texture>
+		</texture>
+
+		<rgb name="k" value="-2, -2, -2"/> <!-- eta and k can't be a single float -->
+
+		<texture name="eta" type="scale">
+			<float name="scale" value="1.0"/>
+			<texture type="bitmap">
+				<string name="filename" value="svr_specular_beck_remapped.exr"/>
+				<string name="wrapMode" value="repeat"/>
+				<float name="gamma" value="1"/>
+			</texture>
+		</texture>
+	</bsdf>
+
+	<!-- DIFFUSE -->
+	<!--<bsdf type="diffuse" id="material_diffuse">
+		<texture name="reflectance" type="scale">
+			<float name="scale" value="1.0"/>
+			<texture type="bitmap">
+				<string name="filename" value="diffuse.exr"/>
+				<string name="wrapMode" value="repeat"/>
+				<float name="gamma" value="1"/>
+			</texture>
+		</texture>
+	</bsdf>-->
+
+	<!-- BUMP OR NORMAL MAP -->
+	<bsdf type="normalmap" id="material_bump">
+		<!-- HEIGHT OR NORMAL MAP -->
+		<texture type="scale">
+			<float name="scale" value="1.0"/>
+			<texture type="bitmap">
+				<string name="filename" value="normal.exr"/>
+				<string name="wrapMode" value="repeat"/>
+				<float name="gamma" value="1"/>
+			</texture>
+		</texture>
+
+		<!--<bsdf type="mixturebsdf">
+			<string name="weights" value="0.5, 0.5"/>
+			<ref id="material_pbr"/>
+			<ref id="material_diffuse"/>
+		</bsdf>-->
+	
+		<ref id="material_pbr"/>
+	</bsdf>
+
+	<!-- SHAPE -->
+	<shape type="obj" id="shape_00">
+		<string name="filename" value="matsphere.obj"/>
+		<transform name="toWorld">
+			<rotate y="1" angle="180"/>
+		</transform>
+		<ref id="material_bump"/>
+	</shape>
+
+	<!-- EMITTERS -->
+	<emitter type="envmap">
+		<string name="filename" value="vogel3.hdr"/>
+		<default name="envmap_yangle" value="0"/>
+		<transform name="toWorld">
+			<rotate y="1" angle="$envmap_yangle"/>
+		</transform>
+		<float name="scale" value="5"/>
+		<float name="gamma" value="1"/>
+	</emitter>
+
+</scene>

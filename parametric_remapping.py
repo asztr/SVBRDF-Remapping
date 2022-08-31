@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import scipy.optimize
 import pyexr
 
-ddf = pd.read_csv('mitsuba-ward2mitsuba-as.csv', sep='\t')
+ddf = pd.read_csv('mitsuba-ward2mitsuba-beck.csv', sep='\t')
 
 srccol_a = 'alpha1'
 srccol_s = 'specular1'
@@ -38,7 +38,7 @@ alpha_params, pcov = scipy.optimize.curve_fit(alpha_func, _x, _y, p0=(1,1,1,1), 
 plt.scatter(_x, _y, color='black')
 plt.plot(_x, alpha_func(_x, *alpha_params), color='red')
 plt.xlabel('Mitsuba Ward roughness')
-plt.ylabel('Mitsuba Ashikhmin-Shirley roughness')
+plt.ylabel('Mitsuba Beckmann roughness')
 plt.savefig('roughness_vs_roughness.jpg', dpi=150)
 print('wrote roughness_vs_roughness.jpg')
 plt.clf()
@@ -55,7 +55,7 @@ for alpha in alphas:
     plt.plot(_x, linear_func(_x, *specular_params), color='red')
     plt.scatter(_x, _y, color='black')
 plt.xlabel('Mitsuba Ward specular reflectance')
-plt.ylabel('Mitsuba Ashikhmin-Shirley F0')
+plt.ylabel('Mitsuba Beckmann F0')
 plt.savefig('specular_vs_specular.jpg', dpi=150)
 print('wrote specular_vs_specular.jpg')
 plt.clf()
@@ -77,13 +77,13 @@ im_spec = pyexr.read('specular.exr')
 remapped_alpha = alpha_func(im_alpha.ravel(), *alpha_params)
 remapped_alpha.shape = im_alpha.shape
 remapped_alpha = remapped_alpha.astype('float32')
-pyexr.write('roughness_as_remapped.exr', remapped_alpha, channel_names=['R', 'G', 'B'])
-print('wrote roughness_as_remapped.exr')
+pyexr.write('roughness_beck_remapped.exr', remapped_alpha, channel_names=['R', 'G', 'B'])
+print('wrote roughness_beck_remapped.exr')
 
 #remap specular
 remapped_f0 = slope_func(im_alpha.ravel(), *slope_params)*im_spec.ravel()
 remapped_f0.shape = im_spec.shape
 remapped_f0 = remapped_f0.astype('float32')
-pyexr.write('specular_as_remapped.exr',remapped_f0, channel_names=['R', 'G', 'B'])
-print('wrote specular_as_remapped.exr')
+pyexr.write('specular_beck_remapped.exr',remapped_f0, channel_names=['R', 'G', 'B'])
+print('wrote specular_beck_remapped.exr')
 

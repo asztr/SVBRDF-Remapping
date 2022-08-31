@@ -8,10 +8,7 @@ import os, sys
 import time
 import pickle
 
-mpl.rcParams['lines.markersize'] = 4
-
-
-df = pd.read_csv('mitsuba-ward2mitsuba-as.csv', sep='\t')
+df = pd.read_csv('mitsuba-ward2mitsuba-beck.csv', sep='\t')
 
 srccol_a = 'alpha1'
 srccol_s = 'specular1'
@@ -87,8 +84,8 @@ tmpcols = np.swapaxes(tmpcols, 0, 1)
 remapped_alpha = alphafit.predict(tmpcols)
 remapped_alpha.shape = im_alpha.shape
 remapped_alpha = remapped_alpha.astype('float32')
-pyexr.write('svr_roughness_as_remapped.exr', remapped_alpha, channel_names=['R', 'G', 'B'])
-print('wrote svr_roughness_as_remapped.exr')
+pyexr.write('svr_roughness_beck_remapped.exr', remapped_alpha, channel_names=['R', 'G', 'B'])
+print('wrote svr_roughness_beck_remapped.exr')
 
 #remap specular
 tmpcols = np.array([im_alpha.ravel(), im_spec.ravel()])
@@ -96,6 +93,6 @@ tmpcols = np.swapaxes(tmpcols, 0, 1)
 remapped_f0 = f0fit.predict(tmpcols)
 remapped_f0.shape = im_spec.shape
 remapped_f0 = remapped_f0.astype('float32')
-pyexr.write('svr_specular_as_remapped.exr',remapped_f0, channel_names=['R', 'G', 'B'])
-print('wrote svr_specular_as_remapped.exr')
+pyexr.write('svr_specular_beck_remapped.exr',remapped_f0, channel_names=['R', 'G', 'B'])
+print('wrote svr_specular_beck_remapped.exr')
 
