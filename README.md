@@ -1,5 +1,6 @@
 # SVBRDF-Remapping
 Code repository for the paper "Image-based remapping of spatially-varying material appearance" (JCGT)
+<<<<<<< Updated upstream
 
 <b>Image-based remapping of spatially-varying material appearance</b><br>
 [Alejandro Sztrajman](https://asztr.github.io),
@@ -78,3 +79,5 @@ If you find our work useful, please cite:
 
 ### Contact
 If you have any questions, please email Alejandro Sztrajman at a.sztrajman@ucl.ac.uk.
+=======
+>>>>>>> Stashed changes
